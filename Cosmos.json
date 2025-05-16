@@ -1,0 +1,1887 @@
+{
+  "name": "Customer Support & Retention Agent",
+  "nodes": [
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "id": "00db67f1-9e0b-4553-b866-065575632676",
+      "name": "Telegram Trigger",
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -1520,
+        360
+      ],
+      "webhookId": "2efb5937-9fb7-41ad-9e7e-0af1e166610e"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "fe7ecc99-e1e8-4a5e-bdd6-6fce9757b234",
+              "name": "text",
+              "value": "={{ $json.message.text }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "58794d3a-982d-4ef8-b7a8-387610f05e23",
+      "name": "Set 'Text'",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -700,
+        580
+      ]
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.message.voice.file_id }}",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "string",
+                      "operation": "exists",
+                      "singleValue": true
+                    },
+                    "id": "c5738e84-e6cc-4e1c-aa02-2fdb927c9571"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Voice"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "484bfcf7-c2e9-4d22-b59b-45032a195e66",
+                    "leftValue": "={{ $json.message.document.file_id }}",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "string",
+                      "operation": "exists",
+                      "singleValue": true
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Document"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "8c844924-b2ed-48b0-935c-c66a8fd0c778",
+                    "leftValue": "={{ $json.message.text }}",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "string",
+                      "operation": "exists",
+                      "singleValue": true
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Text"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "c1353c20-599d-4882-99e6-095a55405a80",
+                    "leftValue": "={{ $json.id }}",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "string",
+                      "operation": "exists",
+                      "singleValue": true
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Email"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "989241ee-0b5f-4556-bc4c-85203e718c16",
+                    "leftValue": "={{ $json.message.photo }}",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "array",
+                      "operation": "exists",
+                      "singleValue": true
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Photo"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "a905a9ee-828d-4292-b37a-fe5f5a06f94d",
+      "name": "Switch",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        -1260,
+        440
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "audio",
+        "operation": "transcribe",
+        "options": {}
+      },
+      "id": "85695725-7155-4c28-ad68-f490eab6dde3",
+      "name": "Transcribe",
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.6,
+      "position": [
+        -680,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "file",
+        "fileId": "={{ $('Telegram Trigger').item.json.message.photo[0].file_id }}"
+      },
+      "id": "8aca5604-e120-403b-b0a2-9792fcee66d4",
+      "name": "Download Photo",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        -860,
+        940
+      ],
+      "webhookId": "05f1250a-793b-40e1-9948-f30a676def35"
+    },
+    {
+      "parameters": {
+        "resource": "image",
+        "operation": "analyze",
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4o",
+          "mode": "list",
+          "cachedResultName": "GPT-4O"
+        },
+        "text": "={{ $('Telegram Trigger').item.json.message.caption }} ",
+        "inputType": "base64",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [
+        -580,
+        940
+      ],
+      "id": "b5fc0cbf-ceb3-44fe-8102-c126a3aa324e",
+      "name": "OpenAI"
+    },
+    {
+      "parameters": {
+        "operation": "information"
+      },
+      "type": "n8n-nodes-base.editImage",
+      "typeVersion": 1,
+      "position": [
+        -720,
+        940
+      ],
+      "id": "81d712c0-ab63-4d44-b722-d1526468036c",
+      "name": "Edit Image"
+    },
+    {
+      "parameters": {
+        "resource": "file",
+        "fileId": "={{ $json.message.voice.file_id }}"
+      },
+      "id": "636f04d3-aec6-40ff-8522-4450ad077bf2",
+      "name": "Download Audio",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        -820,
+        200
+      ],
+      "webhookId": "9e7f7941-7079-426b-ba1f-d40ac421269c"
+    },
+    {
+      "parameters": {
+        "resource": "file",
+        "fileId": "={{ $json.message.document.file_id }}"
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        -820,
+        360
+      ],
+      "id": "fd30942a-b48f-4aa6-bd8b-cc7060a8fb8c",
+      "name": "Download File",
+      "webhookId": "5f568997-fa64-48d0-b3fa-c57c2256ac62"
+    },
+    {
+      "parameters": {
+        "operation": "pdf",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1,
+      "position": [
+        -680,
+        360
+      ],
+      "id": "3602a840-c8a8-40be-8ff3-3980722f3fd3",
+      "name": "Extract from File"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "b6d74693-541a-4f29-b393-0a248cf9b066",
+              "name": "text",
+              "value": "={{ $json.text }}\ncaption: {{ $('Telegram Trigger').item.json.message.caption }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -520,
+        360
+      ],
+      "id": "667940b7-86ac-42eb-adc6-64d03871a66b",
+      "name": "Set 'File'"
+    },
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "filters": {}
+      },
+      "type": "n8n-nodes-base.gmailTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -1520,
+        560
+      ],
+      "id": "19578239-8a5a-4b9e-a516-04adf63ac05a",
+      "name": "Gmail Trigger"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "b6d74693-541a-4f29-b393-0a248cf9b066",
+              "name": "text",
+              "value": "=New email received!\nfrom: {{ $json.From }}\nemailSubject: {{ $json.Subject }}\nemailBody: {{ $json.snippet }}",
+              "type": "string"
+            },
+            {
+              "id": "a2f632e3-0343-43a6-9a9c-d08abde8f20f",
+              "name": "text",
+              "value": "",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -560,
+        740
+      ],
+      "id": "47bbe1a3-1241-4846-b795-cc2fe35a4650",
+      "name": "Set Email"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "df2290f2-4d9d-4d8f-817e-52961895f8e8",
+              "leftValue": "={{ $json.From }}",
+              "rightValue": "ecommojo@gmail.com",
+              "operator": {
+                "type": "string",
+                "operation": "notContains"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -820,
+        760
+      ],
+      "id": "a43c49dc-c5e5-41e6-b0cf-9d4b3a00c622",
+      "name": "Check Email Sender"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-2.0-flash",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        100,
+        640
+      ],
+      "id": "57be9583-5f7a-436a-a9bd-a767c7790dab",
+      "name": "Google Gemini Chat Model"
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n\t\"customerSentiment\": \"positive\"\n}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.2,
+      "position": [
+        320,
+        660
+      ],
+      "id": "83ad4b2e-9541-4e4a-9716-2dd81474e468",
+      "name": "Structured Output Parser"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.text }}",
+        "hasOutputParser": true,
+        "messages": {
+          "messageValues": [
+            {
+              "message": "=Your an AI that analyzes sentiment from the customer’s message to identify frustrated customers and classifies it as:\nPositive/Neutral → Standard response sent.\nNegative/Frustrated → Priority flag applied for human intervention."
+            }
+          ]
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.5,
+      "position": [
+        180,
+        420
+      ],
+      "id": "6664cd2b-aeec-4a64-ae0c-34d91e9bb8f2",
+      "name": "Sentiment Analysis"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "b6d74693-541a-4f29-b393-0a248cf9b066",
+              "name": "text",
+              "value": "={{ $('Telegram Trigger').item.json.message.caption }}\ncaption: {{ $json.content }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -440,
+        940
+      ],
+      "id": "1ff1a69f-ba66-4a6d-9173-e8b0d94bfb10",
+      "name": "Set"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "b6d74693-541a-4f29-b393-0a248cf9b066",
+              "name": "text",
+              "value": "=Message:{{ $json.text }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -60,
+        420
+      ],
+      "id": "956ab4b7-4c70-41e5-94ec-a1a7c630419b",
+      "name": "Set1"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4o",
+          "mode": "list",
+          "cachedResultName": "gpt-4o"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        480,
+        640
+      ],
+      "id": "88a86ade-13fa-4068-aa1e-6a73b0541ec6",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "GaWsU6zYqmbrIuN3",
+          "name": "Client Key"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=customer Mood: {{ $json.output.customerSentiment }}\nCustomer's message: {{ $('Set1').item.json.text }}\ncurrent date and time: {{ $now }}",
+        "options": {
+          "systemMessage": "=# Overview  \nYou are an AI-powered Customer Support Agent responsible for processing customer inquiries, drafting appropriate responses, and updating order or support ticket data based on classification and pre-analyzed sentiment.\n\n## Context  \n- Each inquiry includes a sentiment label (Positive/Neutral or Negative/Frustrated).  \n- The agent does **not** perform sentiment analysis; it receives the sentiment tag as input.  \n- Based on sentiment and inquiry type, the AI will either handle the case or escalate.  \n- The AI must maintain a **formal tone**.  \n- It must respond on the **same channel** the inquiry came from (Email or Telegram).  \n- In cases of vague input, the AI must ask for clarification.  \n\n## Instructions  \n1. Detect the inquiry’s source channel (Email or Telegram).  \n2. Read the pre-tagged sentiment field.  \n   - If **Negative/Frustrated**, flag for human intervention and follow complex issue procedure.  \n   - If **Positive/Neutral**, proceed with standard automated handling.  \n3. Classify the inquiry as one of the following:\n   - FAQ-related  \n   - Order-related  \n   - Complex or urgent issue  \n4. Handle accordingly:\n   - **FAQ**:\n     - Use the FAQs database via OpenAI Embeddings.\n     - Draft a formal response based on matched content.\n     - Send reply on the original channel.\n   - **Order-related**:\n     - Fetch order data from the Google Sheet.\n     - Draft a formal response with relevant tracking/status.\n     - Update order status if needed.\n     - Close the inquiry and send a follow-up feedback request.\n   - **Complex/Urgent or Negative Mood**:\n     - Clarify customer details including name and also email if the customer reached out through Telegram\n     - Call the Get Ticket tool to get the ticket ID trend \n     - **Call Update ticket tool** to create a support ticket in the sheet.\n     - Reply with a formal acknowledgment message on the original channel.\n     - Notify a human agent via **email. Call the Email Tool to send an email to ecommojo@gmail.com**. Always provide the instruction to do eg. send an email along with the recepient's email address to the Email Tool.\n5. If the inquiry lacks enough information:\n   - Ask for clarification in a formal tone by replying on the original channel.\n6. Always reply using the same channel as the inquiry:\n   - Use **Email Tool** for email.\n   - Use **Telegram Tool** for Telegram.\n\n## Tools   \n- FAQs Database: for getting FAQs \n- Google Sheets:\n  - Get Ticket (to read: sheet)  \n  - Update Ticket (to appendOrUpdate: sheet)  \n  - Get Order Details (to read: sheet)  \n  - Update Order Details (to read: sheet)  \n- Email Tool (sendEmail to `krishnaraj3487@gmail.com` for escalations)  \n- Telegram Tool (to sendMessage)\n\n## Examples  \n- Input:  \n  - Source: Telegram  \n  - Mood: Neutral  \n  - Message: \"When will my order #9988 arrive?\"  \n  - Output: \"Thank you for reaching out. Your order #9988 is currently being processed and is expected to arrive within 2-3 business days.\"  \n\n- Input:  \n  - Source: Email  \n  - Mood: Frustrated  \n  - Message: \"I’ve contacted you three times about this issue!\"  \n  - Output: \"We sincerely apologize for the inconvenience. A support ticket has been flagged for priority handling and assigned to a human agent. You will receive an update shortly.\"  \n  - Escalation: Email sent to `ecommojo@gmail.com` with ticket details.\n\n- Input:  \n  - Source: Telegram  \n  - Mood: Neutral  \n  - Message: \"What’s this charge on my card?\"  \n  - Output: \"Could you please specify the date and amount of the charge you’re referring to so we can assist further?\"\n\n## Final Notes  \n- Do not perform sentiment analysis; use provided customer mood input.  \n- Maintain professionalism in tone across all replies.  \n- Always ask for clarification rather than assume.  \n- Make sure to log updates for orders or tickets in the sheets.  \n- Escalate complex or negative-mood inquiries by emailing `ecommojo@gmail.com`.  \n- Always provide the instruction to do (eg. send an email) along with the recepient's email address to the Email Tool.\n\n## **How to Use Email Tool**\n- Never write or generate the email body directly.  \n- Always **prompt the Email Tool** instead.  \n- Explicitly specify the intended **operation** before providing the details:\n  - `\"action\": \"send this email\"` — to send a new email  \n  - `\"action\": \"reply to this email\"` — to reply to a received customer email  \n  - `\"action\": \"draft this email\"` — to save a draft without sending  \n- Include all necessary fields:\n  - `to` — recipient email address  \n  - `subject` — subject line of the email  \n  - `body` — the message content (generated in formal tone)  \n  - `relatedTicketId` or `orderId` if applicable  \n---\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.8,
+      "position": [
+        560,
+        420
+      ],
+      "id": "97575f1a-22bb-4b28-90c7-bb840d567aad",
+      "name": "Customer Support Agent"
+    },
+    {
+      "parameters": {
+        "name": "emailTool",
+        "description": "Call this tool to send emails.",
+        "workflowId": {
+          "__rl": true,
+          "value": "xpk0fGxpDEcdLoOP",
+          "mode": "list",
+          "cachedResultName": "Email Agent"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "query": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('query', ``, 'string') }}"
+          },
+          "matchingColumns": [
+            "query"
+          ],
+          "schema": [
+            {
+              "id": "query",
+              "displayName": "query",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 2.1,
+      "position": [
+        1440,
+        760
+      ],
+      "id": "d968ef2f-0673-42d6-b3f3-1dcb1daf18ad",
+      "name": "Email Tool"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Chat_ID', ``, 'string') }}",
+        "text": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Text', ``, 'string') }}",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegramTool",
+      "typeVersion": 1.2,
+      "position": [
+        1560,
+        760
+      ],
+      "id": "39e59475-ff9f-45af-8fac-552b76c6f46f",
+      "name": "Reply Telegram",
+      "webhookId": "b5fd9b94-662d-4062-a109-4617f0ec5385"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -1220,
+        1460
+      ],
+      "id": "2ab8607c-0cc2-4e8f-9200-fd28d6a4a013",
+      "name": "When clicking ‘Test workflow’"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1CNHIYhsYJUUSBAVee02UdYUVxPYn6OnL0PgIoEfvako",
+          "mode": "list",
+          "cachedResultName": "Ecom Order Details Database",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1CNHIYhsYJUUSBAVee02UdYUVxPYn6OnL0PgIoEfvako/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1CNHIYhsYJUUSBAVee02UdYUVxPYn6OnL0PgIoEfvako/edit#gid=0"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.5,
+      "position": [
+        1200,
+        760
+      ],
+      "id": "a0c2dec4-c07c-4709-9055-4c91934ca5d2",
+      "name": "Get Order Details"
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "1CNHIYhsYJUUSBAVee02UdYUVxPYn6OnL0PgIoEfvako",
+          "mode": "list",
+          "cachedResultName": "Ecom Order Details Database",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1CNHIYhsYJUUSBAVee02UdYUVxPYn6OnL0PgIoEfvako/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1CNHIYhsYJUUSBAVee02UdYUVxPYn6OnL0PgIoEfvako/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Order ID": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Order_ID__using_to_match_', ``, 'string') }}",
+            "Customer Name": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Customer_Name', ``, 'string') }}",
+            "Product": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Product', ``, 'string') }}",
+            "Quantity": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Quantity', ``, 'string') }}",
+            "Price per Unit": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Price_per_Unit', ``, 'string') }}",
+            "Total Price": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Total_Price', ``, 'string') }}",
+            "Order Date": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Order_Date', ``, 'string') }}",
+            "Shipping Status": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Shipping_Status', ``, 'string') }}",
+            "Tracking Number": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Tracking_Number', ``, 'string') }}"
+          },
+          "matchingColumns": [
+            "Order ID"
+          ],
+          "schema": [
+            {
+              "id": "Order ID",
+              "displayName": "Order ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Customer Name",
+              "displayName": "Customer Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Product",
+              "displayName": "Product",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Quantity",
+              "displayName": "Quantity",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Price per Unit",
+              "displayName": "Price per Unit",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Total Price",
+              "displayName": "Total Price",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Order Date",
+              "displayName": "Order Date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Shipping Status",
+              "displayName": "Shipping Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Tracking Number",
+              "displayName": "Tracking Number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.5,
+      "position": [
+        1320,
+        760
+      ],
+      "id": "c2419516-5717-40aa-9a60-fe5510cafdb4",
+      "name": "Update Order Details"
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "1_5OWf5bmWoZNV4Kic1sfUVpnGb5qq-X6SNOdhS3PKWk",
+          "mode": "list",
+          "cachedResultName": "CRM",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1_5OWf5bmWoZNV4Kic1sfUVpnGb5qq-X6SNOdhS3PKWk/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1_5OWf5bmWoZNV4Kic1sfUVpnGb5qq-X6SNOdhS3PKWk/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Ticket ID": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Ticket_ID__using_to_match_', ``, 'string') }}",
+            "Customer Name": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Customer_Name', ``, 'string') }}",
+            "Issue Type": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Issue_Type', `Can ONLY be either of these values: Billing, Shipping, Technical Support, Other`, 'string') }}",
+            "Priority": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Priority', `Can ONLY be either of these values: Low, Medium, High, Urgent`, 'string') }}",
+            "Ticket Status": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Ticket_Status', `Can ONLY be either of these values: Open, In Progress, Resolved, Closed`, 'string') }}",
+            "Subject": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Subject', ``, 'string') }}",
+            "Time Requested": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Time_Requested', ``, 'string') }}",
+            "Assigned Agent": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Assigned_Agent', ``, 'string') }}",
+            "Last Updated": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Last_Updated', ``, 'string') }}",
+            "Customer Email": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Customer_Email', ``, 'string') }}"
+          },
+          "matchingColumns": [
+            "Ticket ID"
+          ],
+          "schema": [
+            {
+              "id": "Ticket ID",
+              "displayName": "Ticket ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Customer Name",
+              "displayName": "Customer Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Customer Email",
+              "displayName": "Customer Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Issue Type",
+              "displayName": "Issue Type",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Priority",
+              "displayName": "Priority",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Ticket Status",
+              "displayName": "Ticket Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Subject",
+              "displayName": "Subject",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Time Requested",
+              "displayName": "Time Requested",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Assigned Agent",
+              "displayName": "Assigned Agent",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Last Updated",
+              "displayName": "Last Updated",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.5,
+      "position": [
+        1080,
+        760
+      ],
+      "id": "4ca7a015-1615-438c-8ce5-9f98b1e1f0f2",
+      "name": "Update Ticket"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1_5OWf5bmWoZNV4Kic1sfUVpnGb5qq-X6SNOdhS3PKWk",
+          "mode": "list",
+          "cachedResultName": "CRM",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1_5OWf5bmWoZNV4Kic1sfUVpnGb5qq-X6SNOdhS3PKWk/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1_5OWf5bmWoZNV4Kic1sfUVpnGb5qq-X6SNOdhS3PKWk/edit#gid=0"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.5,
+      "position": [
+        960,
+        800
+      ],
+      "id": "377218d5-36d5-412b-b288-34a10e3e34a0",
+      "name": "Get Ticket"
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "value": "1F_Z7aczmDkztdGdBmLyekZ4b2m1aq5j4",
+          "mode": "list",
+          "cachedResultName": "customer_support_faqs.csv",
+          "cachedResultUrl": "https://drive.google.com/file/d/1F_Z7aczmDkztdGdBmLyekZ4b2m1aq5j4/view?usp=drivesdk"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        -1000,
+        1460
+      ],
+      "id": "1ceb78ad-f39f-4147-9987-69e36fb2b994",
+      "name": "Google Drive"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        -760,
+        1660
+      ],
+      "id": "84577cc5-8cef-458e-bfd9-0a9b6913351c",
+      "name": "Embeddings OpenAI"
+    },
+    {
+      "parameters": {
+        "dataType": "binary",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.documentDefaultDataLoader",
+      "typeVersion": 1,
+      "position": [
+        -640,
+        1640
+      ],
+      "id": "84c269e4-f3be-45f4-b279-4fa20ba5d6fd",
+      "name": "Default Data Loader"
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.textSplitterCharacterTextSplitter",
+      "typeVersion": 1,
+      "position": [
+        -620,
+        1780
+      ],
+      "id": "081a1f59-c8b4-4052-841b-56ce1e44ca7b",
+      "name": "Character Text Splitter"
+    },
+    {
+      "parameters": {
+        "content": "## FAQ Database Sync\n### Used for uploading and embedding new knowledge into the Pinecone vector store. FAQ documents (CSV or PDF) are processed using OpenAI embeddings and synced for real-time semantic search. This keeps the Support Agent up-to-date with the latest support materials and documents ",
+        "height": 740,
+        "width": 1340,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -1580,
+        1300
+      ],
+      "typeVersion": 1,
+      "id": "643f919b-2705-49d1-927d-e125c0fb1913",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        740,
+        860
+      ],
+      "id": "6c9a828b-e8f4-4435-a1c7-64ae680a29b0",
+      "name": "Embeddings OpenAI1"
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('Customer Support Agent') }}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        620,
+        640
+      ],
+      "id": "7d8c5522-b03d-4d61-8c80-72f7384cf118",
+      "name": "Memory"
+    },
+    {
+      "parameters": {
+        "content": "## Message Type Detector\n### This workflow identifies the source of incoming messages (Gmail and Telegram) and determines their content type — whether it’s text, email, document, image, or audio. Based on the type, it routes the data through relevant pre-processing nodes like Analyze Image, transcription, or PDF extraction, preparing it for AI handling in the next workflow. ",
+        "height": 1200,
+        "width": 1700
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -1800,
+        40
+      ],
+      "typeVersion": 1,
+      "id": "1dc7cc4f-8e5c-46d2-96ea-5b71e72ee2c6",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "mode": "retrieve-as-tool",
+        "toolName": "knwoledge_base",
+        "toolDescription": "This is the database containing all FAQs",
+        "qdrantCollection": {
+          "__rl": true,
+          "value": "qdrant_test3",
+          "mode": "list",
+          "cachedResultName": "qdrant_test3"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreQdrant",
+      "typeVersion": 1.1,
+      "position": [
+        700,
+        700
+      ],
+      "id": "35afdd2a-c18f-4061-923f-e76daf9e2d20",
+      "name": "Qdrant Vector Store"
+    },
+    {
+      "parameters": {
+        "mode": "insert",
+        "qdrantCollection": {
+          "__rl": true,
+          "value": "qdrant_test3",
+          "mode": "list",
+          "cachedResultName": "qdrant_test3"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreQdrant",
+      "typeVersion": 1.1,
+      "position": [
+        -720,
+        1460
+      ],
+      "id": "488eddcd-9403-4dae-8b23-d89feb4da284",
+      "name": "Qdrant Vector Store1"
+    },
+    {
+      "parameters": {
+        "content": "## 24/7 Smart Inbox Agent \n### This workflow takes over once the inquiry type is identified. It performs sentiment analysis using Gemini 1.5 Flash to detect if the customer is frustrated, and auto-escalates such cases to a human. It handles dynamic responses based on Pinecone (FAQs) and Google Sheets (orders, tickets), supports media like PDFs, images, and voice notes, and automatically generates tickets for complex issues.",
+        "height": 1200,
+        "width": 1700,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        40,
+        20
+      ],
+      "typeVersion": 1,
+      "id": "c4f8008a-6709-41c5-a557-9f85f9b81bd3",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "7ab380a2-a8d3-421c-ab4e-748ea8fb7904",
+              "name": "response",
+              "value": "Unable to perform task. Please try again.",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "bf288105-6a80-4c50-9f32-38b050369249",
+      "name": "Try Again",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1180,
+        1580
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "39c2f302-03be-4464-a17a-d7cc481d6d44",
+              "name": "=response",
+              "value": "={{$json.output}}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "bda3af33-d220-4b63-9c56-b8180aaadf8d",
+      "name": "Success",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1180,
+        1400
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.query }}",
+        "options": {
+          "systemMessage": "=# Overview  \nYou are an email management assistant responsible for handling emails efficiently.\n\n## Email Management Actions  \n- **\"Get Emails\"** – Retrieve emails when requested.  \n- **\"Get Labels\"** – Fetch available email labels.  \n- **\"Send Email\"** – Use this to send emails.  \n- **\"Create Draft\"** – Generate a draft if the user requests one.  \n- **\"Email Reply\"** – Respond to an email. First, use \"Get Emails\" to obtain the message ID.  \n- **\"Mark Unread\"** – Mark an email as unread. First, use \"Get Emails\" to retrieve the message ID.  \n- **\"Label Email\"** – Assign a label to an email. First, use \"Get Emails\" to get the message ID, then use \"Get Labels\" to obtain the label ID.  \n\n## Final Notes \n- All emails must be formatted professionally in **HTML** and signed off as **\"krishnaraj.\"**  \n- Current date and time: **{{ $now }}**  "
+        }
+      },
+      "id": "822ba314-a8ed-49ae-8304-c7105e624add",
+      "name": "Email Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.6,
+      "position": [
+        580,
+        1480
+      ],
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $fromAI(\"emailAddress\") }}",
+        "subject": "={{ $fromAI(\"subject\") }}",
+        "message": "={{ $fromAI(\"emailBody\") }}",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmailTool",
+      "typeVersion": 2.1,
+      "position": [
+        260,
+        1840
+      ],
+      "id": "0479373e-5f1b-4e3e-8356-90e612f0a9cc",
+      "name": "Send Email",
+      "webhookId": "86c8c4b1-13bb-4ebe-acb9-30e1d7082d55"
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "limit": "={{ $fromAI(\"limit\",\"how many emails the user wants\") }}",
+        "simple": false,
+        "filters": {
+          "sender": "={{ $fromAI(\"sender\",\"who the emails are from\") }}"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmailTool",
+      "typeVersion": 2.1,
+      "position": [
+        900,
+        1940
+      ],
+      "id": "5e844c40-677b-4310-b573-35ccf2889b93",
+      "name": "Get Emails",
+      "webhookId": "af4b3298-9037-44b0-aa12-2acbfbb5e66f"
+    },
+    {
+      "parameters": {
+        "resource": "draft",
+        "subject": "={{ $fromAI(\"subject\") }}",
+        "emailType": "html",
+        "message": "={{ $fromAI(\"emailBody\") }}",
+        "options": {
+          "sendTo": "={{ $fromAI(\"emailAddress\") }}"
+        }
+      },
+      "type": "n8n-nodes-base.gmailTool",
+      "typeVersion": 2.1,
+      "position": [
+        740,
+        1960
+      ],
+      "id": "21183fdb-dba3-4933-a1ab-1b36c8716d09",
+      "name": "Create Draft",
+      "webhookId": "17016bce-d7d7-428a-a56c-f6ea122db8be"
+    },
+    {
+      "parameters": {
+        "operation": "reply",
+        "messageId": "={{ $fromAI(\"ID\",\"the message ID\") }}",
+        "message": "={{ $fromAI(\"emailBody\") }}",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmailTool",
+      "typeVersion": 2.1,
+      "position": [
+        420,
+        1900
+      ],
+      "id": "49b62c63-dc4d-40a6-bd8e-c2e4dfa430bc",
+      "name": "Email Reply",
+      "webhookId": "114785e6-a859-432b-81b4-c490c1c35b1c"
+    },
+    {
+      "parameters": {
+        "resource": "label",
+        "returnAll": true
+      },
+      "type": "n8n-nodes-base.gmailTool",
+      "typeVersion": 2.1,
+      "position": [
+        1060,
+        1920
+      ],
+      "id": "0692d246-07b3-4450-93ba-6a1e9c0eac58",
+      "name": "Get Labels",
+      "webhookId": "9e08b59e-792d-4566-83f1-9263c9ad86ae"
+    },
+    {
+      "parameters": {
+        "operation": "addLabels",
+        "messageId": "={{ $fromAI(\"ID\",\"the ID of the message\") }}",
+        "labelIds": "={{ $fromAI(\"labelID\") }}"
+      },
+      "type": "n8n-nodes-base.gmailTool",
+      "typeVersion": 2.1,
+      "position": [
+        580,
+        1940
+      ],
+      "id": "8df68208-8109-41dc-8f71-0a1a1474cc09",
+      "name": "Label Emails",
+      "webhookId": "0e951529-2e6d-40bf-ac40-fc0947e242e2"
+    },
+    {
+      "parameters": {
+        "operation": "markAsUnread",
+        "messageId": "={{ $fromAI(\"messageID\") }}"
+      },
+      "type": "n8n-nodes-base.gmailTool",
+      "typeVersion": 2.1,
+      "position": [
+        1240,
+        1900
+      ],
+      "id": "bcb0ca87-815a-486a-9275-0a4c6fb4ca2c",
+      "name": "Mark Unread",
+      "webhookId": "a35af9d8-f67d-4ff9-803f-59ec6356e795"
+    },
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "query"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        340,
+        1480
+      ],
+      "id": "0861203e-1536-4234-8054-d64a397fe486",
+      "name": "When Executed by Another Workflow"
+    },
+    {
+      "parameters": {
+        "model": "gpt-4o",
+        "options": {}
+      },
+      "id": "386d0e69-eda6-4125-880f-ed792169a0cd",
+      "name": "OpenAI Chat Model1",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1,
+      "position": [
+        100,
+        1760
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Smart Gmail AI Assistant \n\n### This Gmail AI Agent lets you manage your inbox using natural language. It can send, reply to, and draft emails automatically, fetch unread messages, and organize them with smart labeling. Powered by GPT-4o, it understands your intent and extracts key details to perform actions like marking emails as unread or categorizing them ",
+        "height": 960,
+        "width": 1660
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -40,
+        1260
+      ],
+      "typeVersion": 1,
+      "id": "271175ea-65f3-443c-8371-ca6f03a9fde5",
+      "name": "Sticky Note4"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set 'Text'": {
+      "main": [
+        [
+          {
+            "node": "Set1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "Download Audio",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Download File",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Set 'Text'",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Check Email Sender",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Download Photo",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Transcribe": {
+      "main": [
+        [
+          {
+            "node": "Set1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download Photo": {
+      "main": [
+        [
+          {
+            "node": "Edit Image",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI": {
+      "main": [
+        [
+          {
+            "node": "Set",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Image": {
+      "main": [
+        [
+          {
+            "node": "OpenAI",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download Audio": {
+      "main": [
+        [
+          {
+            "node": "Transcribe",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download File": {
+      "main": [
+        [
+          {
+            "node": "Extract from File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract from File": {
+      "main": [
+        [
+          {
+            "node": "Set 'File'",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set 'File'": {
+      "main": [
+        [
+          {
+            "node": "Set1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gmail Trigger": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Email": {
+      "main": [
+        [
+          {
+            "node": "Set1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Email Sender": {
+      "main": [
+        [
+          {
+            "node": "Set Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Sentiment Analysis",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Sentiment Analysis",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Sentiment Analysis": {
+      "main": [
+        [
+          {
+            "node": "Customer Support Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set": {
+      "main": [
+        [
+          {
+            "node": "Set1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set1": {
+      "main": [
+        [
+          {
+            "node": "Sentiment Analysis",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Customer Support Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Email Tool": {
+      "ai_tool": [
+        [
+          {
+            "node": "Customer Support Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Reply Telegram": {
+      "ai_tool": [
+        [
+          {
+            "node": "Customer Support Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When clicking ‘Test workflow’": {
+      "main": [
+        [
+          {
+            "node": "Google Drive",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Order Details": {
+      "ai_tool": [
+        [
+          {
+            "node": "Customer Support Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Order Details": {
+      "ai_tool": [
+        [
+          {
+            "node": "Customer Support Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Ticket": {
+      "ai_tool": [
+        [
+          {
+            "node": "Customer Support Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Ticket": {
+      "ai_tool": [
+        [
+          {
+            "node": "Customer Support Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Drive": {
+      "main": [
+        [
+          {
+            "node": "Qdrant Vector Store1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings OpenAI": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Qdrant Vector Store1",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Default Data Loader": {
+      "ai_document": [
+        [
+          {
+            "node": "Qdrant Vector Store1",
+            "type": "ai_document",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Character Text Splitter": {
+      "ai_textSplitter": [
+        [
+          {
+            "node": "Default Data Loader",
+            "type": "ai_textSplitter",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings OpenAI1": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Qdrant Vector Store",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "Customer Support Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Qdrant Vector Store": {
+      "ai_tool": [
+        [
+          {
+            "node": "Customer Support Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Email Agent": {
+      "main": [
+        [
+          {
+            "node": "Success",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Try Again",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Email": {
+      "ai_tool": [
+        [
+          {
+            "node": "Email Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Email Reply": {
+      "ai_tool": [
+        [
+          {
+            "node": "Email Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Emails": {
+      "ai_tool": [
+        [
+          {
+            "node": "Email Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Draft": {
+      "ai_tool": [
+        [
+          {
+            "node": "Email Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Labels": {
+      "ai_tool": [
+        [
+          {
+            "node": "Email Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Label Emails": {
+      "ai_tool": [
+        [
+          {
+            "node": "Email Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mark Unread": {
+      "ai_tool": [
+        [
+          {
+            "node": "Email Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "Email Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Email Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Customer Support Agent": {
+      "main": [
+        []
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "06c9e675-2015-4f6f-baf2-25045f614cb0",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "31f1a1396d786be175c218882f56e704b3ad0be91c87638d802bdd469eb9d677"
+  },
+  "id": "JXYVxgOl5CQMyyBT",
+  "tags": []
+}
