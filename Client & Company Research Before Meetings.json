@@ -1,0 +1,729 @@
+{
+  "name": "Briefing Agent System",
+  "nodes": [
+    {
+      "parameters": {
+        "toolDescription": "Use this to scrape posts of a company's linkedin page.",
+        "method": "POST",
+        "url": "https://api.apify.com/v2/acts/sormind~linkedin-company-posts/run-sync-get-dataset-items?token=",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{\n    \"company_name\": \"{linkedinUrl}\"\n}",
+        "placeholderDefinitions": {
+          "values": [
+            {
+              "name": "linkedinUrl",
+              "description": "The linkedin url of the company you want to scrape the posts of",
+              "type": "string"
+            }
+          ]
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolHttpRequest",
+      "typeVersion": 1.1,
+      "position": [
+        160,
+        2300
+      ],
+      "id": "5ca8bee8-6cd3-49b6-8509-d507ef0d0269",
+      "name": "LinkedIn Company Posts Scraper"
+    },
+    {
+      "parameters": {
+        "toolDescription": "Use this tool to scrape the linkedIn page of the person.",
+        "method": "POST",
+        "url": "https://api.apify.com/v2/acts/sormind~linkedin-profile-posts/run-sync-get-dataset-items?token=YOUR_API_KEY",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{\n    \"username\": \"{linkedinUrl}\"\n}",
+        "placeholderDefinitions": {
+          "values": [
+            {
+              "name": "linkedinUrl",
+              "description": "The linkedinUrl of the person you want to research",
+              "type": "string"
+            }
+          ]
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolHttpRequest",
+      "typeVersion": 1.1,
+      "position": [
+        460,
+        2160
+      ],
+      "id": "79233337-5824-4015-8a63-b1ceadb84569",
+      "name": "LinkedIn Person Scraper"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolSerpApi",
+      "typeVersion": 1,
+      "position": [
+        20,
+        2320
+      ],
+      "id": "2338a73e-f907-40c1-8e11-2c6bb5e14f1a",
+      "name": "Google Search",
+      "credentials": {
+        "serpApi": {
+          "id": "4Fq4d4Tz7cpnWQ0H",
+          "name": "SerpAPI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "text": "={{ $json.query }}",
+        "schemaType": "fromJson",
+        "jsonSchemaExample": "{\n    \"linkedinPersonUrl\": \"https://www.linkedin.com/in/elonmusk\",\n    \"linkedinCompanyUrl\": \"https://www.linkedin.com/company/tesla-motors\",\n    \"websiteUrl\": \"https://www.tesla.com\",\n    \"email\": \"elon.musk@tesla.com\",\n    \"isBusinessEmail\": true,\n    \"personName\": \"Elon Musk\",\n    \"companyName\": \"Tesla\"\n}",
+        "options": {
+          "systemPromptTemplate": "=You are an expert extraction algorithm.\nOnly extract relevant information from the text.\nIf you do not know the value of an attribute asked to extract, you may omit the attribute's value.\nThe isBusinessEmail should be true if the email account is not from an email provider like Google, Outlook, Zoho, etc. This has to be false if there is no email."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.informationExtractor",
+      "typeVersion": 1,
+      "position": [
+        -820,
+        1920
+      ],
+      "id": "466fd5a2-e788-4244-97b9-97d253960248",
+      "name": "Information Extractor1"
+    },
+    {
+      "parameters": {
+        "jsCode": "const email = $input.first().json.output.email\nconsole.log(email);\nconst domain = email.split(\"@\")[1];\nconsole.log(domain);\nlet json = $('Information Extractor1').first().json\nconsole.log(json)\njson.output.websiteUrl = domain\nconsole.log(json)\nreturn json;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -180,
+        1900
+      ],
+      "id": "e4b32b06-4e2c-4cf1-aa7e-3d36f7aff44a",
+      "name": "Gets domain name from business email"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "665b8b0e-0ae3-4d75-a075-a9e5ce87475d",
+              "leftValue": "={{ $json.output.isBusinessEmail }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "a200001f-078c-47f6-b41b-959d41aaab98",
+              "leftValue": "={{ $json.output.websiteUrl }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "empty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -460,
+        1960
+      ],
+      "id": "e16de0ec-03a0-4d85-b895-9369ffad880e",
+      "name": "If business email and no websiteURL"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "aeec5af9-cdfb-40bb-86cc-af6b7c9a6fea",
+              "name": "response",
+              "value": "={{ $json.output }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        500,
+        1940
+      ],
+      "id": "a9458e34-c699-43c0-903f-caa79b9cc2a6",
+      "name": "Response"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "c4f96e39-bb7c-47b0-811c-b5cabfba901d",
+              "name": "query",
+              "value": "={{ $json.chatInput }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -1040,
+        1980
+      ],
+      "id": "a5a1d1d9-2f34-4e2e-8516-0e144902f957",
+      "name": "Edit Fields1"
+    },
+    {
+      "parameters": {
+        "operation": "search",
+        "base": {
+          "__rl": true,
+          "value": "appTvokhDcp5AOr3M",
+          "mode": "list",
+          "cachedResultName": "CRM",
+          "cachedResultUrl": "https://airtable.com/appTvokhDcp5AOr3M"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblaJjHB6Is4xAJEC",
+          "mode": "list",
+          "cachedResultName": "Contacts",
+          "cachedResultUrl": "https://airtable.com/appTvokhDcp5AOr3M/tblaJjHB6Is4xAJEC"
+        },
+        "options": {}
+      },
+      "id": "32660501-fd7a-4370-b0b6-185a4ce47a53",
+      "name": "Find Contact",
+      "type": "n8n-nodes-base.airtableTool",
+      "typeVersion": 2.1,
+      "position": [
+        -220,
+        2300
+      ],
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "TmUWt1pdw4woGEee",
+          "name": "Airtable Personal Access Token account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "7cec8c06-cf37-4f72-90f6-182fd2c94c53",
+      "name": "Anthropic Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
+      "typeVersion": 1.2,
+      "position": [
+        -540,
+        2240
+      ],
+      "credentials": {
+        "anthropicApi": {
+          "id": "vImkO4N8gzDJNzPJ",
+          "name": "Anthropic account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "4ff67d88-dd6d-405d-afa5-cfd88bda45e9",
+      "name": "Anthropic Chat Model1",
+      "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
+      "typeVersion": 1.2,
+      "position": [
+        -360,
+        2280
+      ],
+      "credentials": {
+        "anthropicApi": {
+          "id": "vImkO4N8gzDJNzPJ",
+          "name": "Anthropic account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "calendarId": {
+          "__rl": true,
+          "value": "roberto@lunivate.com",
+          "mode": "list",
+          "cachedResultName": "roberto@lunivate.com"
+        },
+        "triggerOn": "eventCreated",
+        "options": {}
+      },
+      "id": "bb02d76b-db66-4047-a367-2583a86bf344",
+      "name": "Google Calendar Trigger",
+      "type": "n8n-nodes-base.googleCalendarTrigger",
+      "typeVersion": 1,
+      "position": [
+        -1300,
+        1880
+      ],
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "f7GtQxu0llOccJBR",
+          "name": "Google Calendar account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "create",
+        "base": {
+          "__rl": true,
+          "value": "appTvokhDcp5AOr3M",
+          "mode": "list",
+          "cachedResultName": "CRM",
+          "cachedResultUrl": "https://airtable.com/appTvokhDcp5AOr3M"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblaJjHB6Is4xAJEC",
+          "mode": "list",
+          "cachedResultName": "Contacts",
+          "cachedResultUrl": "https://airtable.com/appTvokhDcp5AOr3M/tblaJjHB6Is4xAJEC"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Name",
+              "displayName": "Name",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Phone Number",
+              "displayName": "Phone Number",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Department",
+              "displayName": "Department",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "HR",
+                  "value": "HR"
+                },
+                {
+                  "name": "IT",
+                  "value": "IT"
+                },
+                {
+                  "name": "Executive",
+                  "value": "Executive"
+                },
+                {
+                  "name": "",
+                  "value": ""
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Reached Out",
+                  "value": "Reached Out"
+                },
+                {
+                  "name": "Discussion",
+                  "value": "Discussion"
+                },
+                {
+                  "name": "Did not respond",
+                  "value": "Did not respond"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Date reached out",
+              "displayName": "Date reached out",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": false
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "9abea987-ac16-4ef0-9ecb-03ece87403e2",
+      "name": "Airtable",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [
+        740,
+        2000
+      ],
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "TmUWt1pdw4woGEee",
+          "name": "Airtable Personal Access Token account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "additionalFields": {},
+        "requestOptions": {}
+      },
+      "id": "d2f6135d-cf63-4fc5-a6ca-61f5adad6db2",
+      "name": "HighLevel",
+      "type": "n8n-nodes-base.highLevel",
+      "typeVersion": 2,
+      "position": [
+        960,
+        2000
+      ],
+      "credentials": {
+        "highLevelOAuth2Api": {
+          "id": "h2UyJson6rduy1MG",
+          "name": "HighLevel account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ JSON.stringify($json.output) }}",
+        "options": {
+          "systemMessage": "=You are a briefing agent. You should research the person/company and give a briefing on them and their company, which will be used to get ready for a meeting with the person.\n\nFor researching this person/company, you have many tools available to you. Use the information you get in the input to decide what tools to use to gather information about the person/company. \n\n\n## Output\nThe briefing should be a structured output, no longer than 200 words. Only use the points you have actual solid information about. Do not include the points you do not have actual information about. It is fine to only do 2 points, if you find no more information. It should have a small summary at the start, then split into the following four points, if you have that information:\n1. The job role of the person at the company.\n2. Short summary of the person.\n3. Short summary of the company.\n4. Recent updates. Summarised from the 1-3 most recent linkedin posts of the person and/or the company.\n5. What you talked about in recent conversations (If there is no recent conversations, do not include this point).\n\n\n## Tools\n\n### Website Text Scraper\nUse this tool to extract all text from a company's website. If you have their company email (not gmail, outlook, etc), you can use the domain in their email as their website.\n\n**Requirements**\nYou need the \"websiteUrl\" to use this tool. If you don't you're not allowed to use it.\n\n### LinkedIn Person Scraper\nUse this tool to extract the person's linkedin posts.\n\n**Requirements**\nYou need the person's \"linkedinPersonUrl\" to use this tool. If you don't you're not allowed to use it.\n\n### Website Text Scraper\nUse this tool to extract  the company's linkedin posts.\n\n**Requirements**\nYou need the \"linkedinCompanyUrl\" to use this tool. If you don't you're not allowed to use it.\n\n### Google Search\nUse this tool to find information about the person and the company by doing a google search with their name and company. Don't use this tool unless you don't have the information to use any other tool.\n\n**Requirements**\nOnly use this tool when you do not have any detailed infromation about the person or company, and do not have the url link to any website or linkedin. If the person you find data on does not seem to be related to the company, say that you can not find [person's name] working at [company's name].\n\n### Get Email Conversation\nUse this tool to get the email conversation with the email provided by the user, IF there was an email account provided.\n\n**Requirements**\nOnly use this tool if there is an \"email\" attribute provided."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [
+        100,
+        1940
+      ],
+      "id": "6b16297d-ad5f-4134-b816-aab172df3456",
+      "name": "Briefing Agent"
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "operation": "getAll",
+        "returnAll": true,
+        "filters": {
+          "q": ""
+        }
+      },
+      "id": "0b13466b-10a0-4167-9e56-84cc9913fe1f",
+      "name": "Find Emails",
+      "type": "n8n-nodes-base.gmailTool",
+      "typeVersion": 2.1,
+      "position": [
+        -100,
+        2320
+      ],
+      "webhookId": "5fba850a-83d5-424c-92aa-d4be9dfa2890",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "J9uzav9Mq90SWmD7",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "toolDescription": "Use this tool to scrape the full contacts associated of the the persons website.",
+        "method": "POST",
+        "url": "https://api.apify.com/v2/actor-tasks/sormind~contact-details-scraper-task/run-sync?token=***OUR_API_KEY",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{\n    \"considerChildFrames\": true,\n    \"maxDepth\": 2,\n    \"maxRequests\": 9999999,\n    \"maxRequestsPerStartUrl\": 20,\n    \"sameDomain\": true,\n    \"startUrls\": [\n        {\n            \"url\": \"{URL}\",\n            \"method\": \"GET\"\n        }\n    ],\n    \"useBrowser\": false\n}",
+        "placeholderDefinitions": {
+          "values": [
+            {
+              "name": "linkedinUrl",
+              "description": "The linkedinUrl of the person you want to research",
+              "type": "string"
+            }
+          ]
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolHttpRequest",
+      "typeVersion": 1.1,
+      "position": [
+        300,
+        2240
+      ],
+      "id": "420589df-3885-4576-a685-f230559c7c69",
+      "name": "Full Contacts Scraper from Website"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "LinkedIn Company Posts Scraper": {
+      "ai_tool": [
+        [
+          {
+            "node": "Briefing Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "LinkedIn Person Scraper": {
+      "ai_tool": [
+        [
+          {
+            "node": "Briefing Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Search": {
+      "ai_tool": [
+        [
+          {
+            "node": "Briefing Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Information Extractor1": {
+      "main": [
+        [
+          {
+            "node": "If business email and no websiteURL",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gets domain name from business email": {
+      "main": [
+        [
+          {
+            "node": "Briefing Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If business email and no websiteURL": {
+      "main": [
+        [
+          {
+            "node": "Gets domain name from business email",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Briefing Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields1": {
+      "main": [
+        [
+          {
+            "node": "Information Extractor1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Find Contact": {
+      "ai_tool": [
+        [
+          {
+            "node": "Briefing Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Anthropic Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Information Extractor1",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Anthropic Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Briefing Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Calendar Trigger": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Response": {
+      "main": [
+        [
+          {
+            "node": "Airtable",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Airtable": {
+      "main": [
+        [
+          {
+            "node": "HighLevel",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Briefing Agent": {
+      "main": [
+        [
+          {
+            "node": "Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Find Emails": {
+      "ai_tool": [
+        [
+          {
+            "node": "Briefing Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Full Contacts Scraper from Website": {
+      "ai_tool": [
+        [
+          {
+            "node": "Briefing Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "680b40c7-d062-4845-a025-bc99a5459908",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "30c08a5aa52a9dc2befcd59973dbded7fd6927a19c74af711b2b4c498e159b6e"
+  },
+  "id": "V8BP4jkffTqlQnVG",
+  "tags": []
+}
